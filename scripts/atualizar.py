@@ -27,7 +27,7 @@ MARKETS = {
 
 
 def client() -> TrendReq:
-    return TrendReq(hl="pt-BR", tz=180, retries=2, backoff_factor=0.5)
+     return TrendReq(hl="pt-BR", tz=180)
 
 
 def request_with_retry(fn, attempts=4):
