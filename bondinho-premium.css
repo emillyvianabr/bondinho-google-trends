@@ -1,0 +1,104 @@
+:root{
+  --orange:#FF6600;
+  --orange-dark:#CC5200;
+  --orange-soft:#FFF0E6;
+  --orange-pale:#FFF8F3;
+  --ink:#17202A;
+  --text:#3D4650;
+  --muted:#7D8792;
+  --line:#E7EAED;
+  --line-2:#D9DEE3;
+  --surface:#FFFFFF;
+  --bg:#F5F6F7;
+  --navy:#1C2834;
+  --green:#16855B;
+  --red:#C84A3A;
+  --shadow:0 8px 28px rgba(25,33,40,.055);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+button,select,input{font:inherit}
+.accent-bar{height:5px;background:linear-gradient(90deg,var(--orange-dark),var(--orange),#FFB078)}
+.shell{width:min(1420px,calc(100% - 48px));margin:0 auto}
+.site-header{background:var(--surface);border-bottom:1px solid var(--line)}
+.header-grid{display:grid;grid-template-columns:1fr auto;gap:32px;align-items:end;padding:32px 0 28px}
+.eyebrow,.section-kicker,.mini-label{font-size:10px;line-height:1;text-transform:uppercase;letter-spacing:.14em;font-weight:800;color:var(--orange-dark)}
+.eyebrow{display:flex;align-items:center;gap:9px;color:#59636D}.eyebrow span{width:20px;height:3px;border-radius:999px;background:var(--orange)}
+.title-block h1{margin:12px 0 8px;font-size:clamp(32px,4vw,52px);line-height:.98;letter-spacing:-.045em;font-weight:760}.title-block h1 em{font-style:normal;color:var(--orange);font-weight:450}.title-block p{margin:0;color:var(--muted);font-size:14px;max-width:720px}
+.header-meta{min-width:245px;border-left:3px solid var(--orange);padding:4px 0 4px 16px}.meta-label{font-size:10px;text-transform:uppercase;letter-spacing:.11em;color:var(--muted);font-weight:800}.meta-value{font-size:18px;font-weight:760;margin-top:3px}.meta-note{font-size:11px;color:var(--muted);margin-top:3px}.meta-updated{margin-top:10px;padding-top:8px;border-top:1px solid var(--line);font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:750}.meta-updated strong{color:var(--orange-dark);font-weight:850}
+.dashboard{padding:18px 0 46px}
+.filter-bar{position:relative;z-index:8;background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:13px 14px;display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:28px}
+.filters-left,.data-actions{display:flex;align-items:center;gap:10px}.field label,.month-field label{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.09em;font-weight:800;color:var(--muted);margin:0 0 5px 2px}.field select{height:40px;min-width:205px;padding:0 38px 0 12px;border:1px solid var(--line-2);border-radius:10px;background:#fff;color:var(--ink);outline:none}.field-small select{min-width:120px}.field select:focus,.month-field input:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(245,123,37,.1)}
+.ghost-button,.soft-button{border:0;cursor:pointer;font-weight:750}.ghost-button{height:40px;padding:0 10px;background:transparent;color:var(--muted);font-size:12px}.ghost-button:hover{color:var(--orange-dark)}.soft-button{height:38px;padding:0 13px;border-radius:9px;background:var(--orange-soft);color:var(--orange-dark);font-size:11px}.soft-button:hover{background:#FFE6D6}
+.data-status{font-size:10px;color:var(--muted);white-space:nowrap;display:flex;align-items:center;gap:7px}.data-status:before{content:"";width:7px;height:7px;border-radius:50%;background:#B7BEC6}.data-status.success:before{background:var(--green)}.data-status.error:before{background:var(--red)}
+.data-menu{position:relative}.data-menu summary{list-style:none;height:40px;padding:0 13px;border:1px solid var(--line-2);border-radius:10px;background:#fff;display:flex;align-items:center;font-size:11px;font-weight:750;cursor:pointer;color:var(--text)}.data-menu summary::-webkit-details-marker{display:none}.data-menu-panel{position:absolute;right:0;top:47px;width:320px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px;box-shadow:0 18px 50px rgba(18,27,34,.14);z-index:20}.menu-title{font-size:13px;font-weight:800;margin-bottom:8px}.menu-title-spaced{margin-top:15px;padding-top:13px;border-top:1px solid var(--line)}.data-menu-panel p{font-size:11px;color:var(--muted);line-height:1.5;margin:6px 0}.data-menu-panel code,.format-help code,.geo-footnote code,footer code{background:#F3F4F5;border-radius:5px;padding:2px 4px}.download-btn,.upload-btn{display:flex;width:100%;align-items:center;justify-content:center;border:0;background:var(--orange);color:#fff;text-decoration:none;border-radius:9px;padding:10px 12px;font-size:11px;font-weight:800;cursor:pointer;margin:7px 0}.download-btn-light{background:var(--orange-soft);color:var(--orange-dark)}.upload-btn{margin:11px 0 8px}.link-btn{border:0;background:transparent;padding:0;color:var(--orange-dark);font-size:10px;font-weight:800;cursor:pointer}.format-help{margin-top:10px;border-top:1px solid var(--line);padding-top:10px;font-size:10px;color:var(--muted);line-height:1.5}.format-help.hidden{display:none}
+.section-block{margin-top:34px}.section-intro{display:flex;justify-content:space-between;gap:22px;align-items:flex-end;margin:0 2px 13px}.section-intro h2{font-size:21px;letter-spacing:-.025em;margin:5px 0 0}.section-intro p{max-width:460px;text-align:right;color:var(--muted);font-size:11px;line-height:1.5;margin:0}.section-intro strong{color:var(--text)}
+.kpi-grid{display:grid;grid-template-columns:1.15fr repeat(4,1fr);gap:10px}.kpi-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 17px;min-height:116px;box-shadow:0 3px 14px rgba(24,31,37,.025)}.primary-kpi{background:linear-gradient(135deg,#FFF8F3 0%,#FFF0E6 100%);border-color:#F5D7C3}.kpi-label{font-size:9px;text-transform:uppercase;letter-spacing:.07em;font-weight:800;color:var(--muted)}.kpi-card strong{display:block;font-size:31px;line-height:1;letter-spacing:-.04em;margin:12px 0 5px}.primary-kpi strong{color:var(--orange-dark)}.kpi-card small{display:block;color:#929AA3;font-size:10px;line-height:1.35}.positive{color:var(--green)!important}.negative{color:var(--red)!important}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px 19px;box-shadow:var(--shadow);min-width:0}.hero-chart-panel{margin-top:12px;padding:20px 22px 15px}.panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:22px;margin-bottom:10px}.panel-head h2{font-size:19px;letter-spacing:-.02em;margin:5px 0 3px}.panel-head h3,.radar-head h3{font-size:16px;letter-spacing:-.015em;margin:4px 0 3px}.panel-head p,.radar-head p{font-size:10.5px;color:var(--muted);margin:0;line-height:1.45}.compact-head{margin-bottom:8px}
+.date-controls{display:flex;gap:8px;align-items:flex-end}.month-field input{height:38px;min-width:142px;border:1px solid var(--line-2);border-radius:9px;background:#fff;padding:0 8px;color:var(--ink);outline:none}
+.chart-wrap{height:310px;position:relative}.chart-xl{height:400px}.chart-tall{height:340px}.two-col{display:grid;grid-template-columns:1.22fr .78fr;gap:16px}.comparison-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.comparison-grid .panel{min-height:420px;display:flex;flex-direction:column}.comparison-grid .chart-wrap{height:330px;margin-top:auto}.comparison-grid .ranking-panel{grid-row:auto}.compare-section{padding-top:2px}.compare-intro{border-left:3px solid var(--orange);padding-left:14px}
+.season-panel{display:flex;flex-direction:column}.seasonality{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:10px}.season-cell{min-height:63px;border-radius:10px;border:1px solid #EFE8E3;padding:10px 7px;text-align:center;display:flex;flex-direction:column;justify-content:center}.season-cell span{font-size:9px;color:#6F7881;font-weight:800}.season-cell b{font-size:17px;margin-top:3px}.season-legend{display:flex;align-items:center;gap:8px;margin-top:auto;padding-top:12px;color:var(--muted);font-size:9px}.season-legend div{height:5px;flex:1;border-radius:999px;background:linear-gradient(90deg,#FFF8F3,#FFD9BF,var(--orange))}
+.geo-layout{display:grid;grid-template-columns:1.08fr .92fr;gap:12px}.geo-legend{display:flex;gap:14px;margin:3px 0 6px;color:var(--muted);font-size:9px}.geo-legend span{display:flex;align-items:center;gap:5px}.geo-dot{width:7px;height:7px;border-radius:50%;display:inline-block}.geo-dot.core{background:var(--orange-soft)}.geo-dot.opportunity{background:var(--orange)}.geo-heatmap{width:100%;height:100%;overflow:hidden}.radar-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}.radar-status{border:1px solid var(--line);background:#FAFAFB;border-radius:999px;padding:6px 9px;color:var(--muted);font-size:9px;font-weight:800;white-space:nowrap}.geo-radar{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:13px}.geo-radar-item{display:grid;grid-template-columns:25px 1fr auto;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;padding:10px;background:#FCFCFD}.geo-rank{width:24px;height:24px;border-radius:7px;background:var(--orange-soft);color:var(--orange-dark);display:grid;place-items:center;font-size:9px;font-weight:900}.geo-country strong{display:block;font-size:10.5px}.geo-country small{display:block;font-size:8.5px;color:var(--muted);margin-top:2px}.geo-metric{text-align:right}.geo-metric strong{display:block;color:var(--orange-dark);font-size:14px}.geo-metric small{font-size:8.5px;color:var(--muted)}.geo-metric small.up{color:var(--green);font-weight:800}.geo-metric small.down{color:var(--red);font-weight:800}.geo-footnote{font-size:9px;color:var(--muted);line-height:1.45;margin:10px 1px 0}
+.diagnostic-grid{display:grid;grid-template-columns:.75fr 1.25fr;gap:12px}.peaks{display:flex;flex-direction:column}.peak-row{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;padding:9px 5px;border-bottom:1px solid #EEF0F1}.peak-row:last-child{border-bottom:0}.peak-rank{width:25px;height:25px;border-radius:7px;background:var(--orange-soft);color:var(--orange-dark);display:grid;place-items:center;font-size:9px;font-weight:900}.peak-row strong{font-size:11px}.peak-row small{display:block;color:var(--muted);font-size:9px;margin-top:2px}.peak-row strong:last-child{font-size:15px;color:var(--orange-dark)}.insight-panel{background:var(--navy);color:#fff;border-radius:16px;padding:24px 25px;display:flex;flex-direction:column;justify-content:center;min-height:230px}.light-kicker{color:#FFAE75}.insight-panel h3{font-size:21px;letter-spacing:-.02em;margin:8px 0 12px}.insight-panel p{color:#D6DCE1;font-size:12px;line-height:1.75;margin:0;max-width:760px}
+.methodology{margin-top:34px;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}.methodology summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:18px 20px;cursor:pointer}.methodology summary::-webkit-details-marker{display:none}.methodology summary h2{font-size:17px;margin:4px 0 0}.method-action{font-size:10px;font-weight:800;color:var(--orange-dark)}.methodology[open] .method-action{font-size:0}.methodology[open] .method-action:after{content:"Fechar";font-size:10px}.method-body{border-top:1px solid var(--line);padding:18px 20px}.method-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.method-grid article{background:#FAFAFB;border:1px solid var(--line);border-radius:12px;padding:15px}.method-grid article>span{font-size:9px;letter-spacing:.12em;font-weight:900;color:var(--orange-dark)}.method-grid h3{font-size:13px;margin:6px 0 8px}.method-grid p{font-size:10.5px;line-height:1.6;color:#606A74;margin:0}.method-note{margin-top:10px;background:var(--orange-pale);border:1px solid #F3DDCE;border-radius:10px;padding:12px 13px;font-size:10.5px;color:#68584E;line-height:1.55}
+footer{display:flex;justify-content:space-between;gap:18px;border-top:1px solid var(--line);margin-top:28px;padding:17px 2px 0;color:#8C949D;font-size:9.5px}
+@media(max-width:1120px){.kpi-grid{grid-template-columns:repeat(3,1fr)}.primary-kpi{grid-column:auto}.comparison-grid{grid-template-columns:1fr 1fr}.comparison-grid .panel{min-height:400px}.geo-layout{grid-template-columns:1fr}.method-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:850px){.shell{width:min(94%,calc(100% - 28px))}.header-grid{grid-template-columns:1fr}.header-meta{border-left:0;border-top:2px solid var(--orange);padding:12px 0 0;min-width:0}.filter-bar{align-items:flex-start;flex-direction:column}.data-actions{width:100%;justify-content:space-between}.two-col,.comparison-grid,.diagnostic-grid{grid-template-columns:1fr}.comparison-grid .panel{min-height:auto}.comparison-grid .chart-wrap{height:320px}.section-intro{align-items:flex-start;flex-direction:column;gap:6px}.section-intro p{text-align:left}.geo-radar{grid-template-columns:repeat(3,1fr)}.chart-xl{height:340px}}
+@media(max-width:650px){.shell{width:calc(100% - 24px)}.header-grid{padding:24px 0}.title-block h1{font-size:34px}.filters-left{width:100%;flex-wrap:wrap}.field{flex:1}.field select,.field-small select{width:100%;min-width:0}.data-actions{align-items:flex-start;flex-direction:column}.data-menu-panel{left:0;right:auto;width:min(320px,88vw)}.kpi-grid{grid-template-columns:1fr 1fr}.panel-head{flex-direction:column}.date-controls{width:100%;flex-wrap:wrap}.month-field{flex:1}.month-field input{width:100%;min-width:0}.seasonality{grid-template-columns:repeat(3,1fr)}.geo-radar{grid-template-columns:1fr 1fr}.method-grid{grid-template-columns:1fr}.chart-wrap{height:275px}.chart-xl{height:310px}.chart-tall{height:330px}footer{flex-direction:column}}
+@media(max-width:430px){.kpi-grid{grid-template-columns:1fr}.geo-radar{grid-template-columns:1fr}.seasonality{grid-template-columns:repeat(2,1fr)}}
+
+/* Cristo × Bondinho — módulo comparativo */
+.attraction-compare-section{margin-top:26px}
+.attraction-compare-intro{align-items:flex-end}
+.attraction-summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.attraction-kpi{position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;min-height:106px}
+.attraction-kpi:before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:#C9CDD2}
+.attraction-kpi-orange:before{background:var(--orange)}
+.attraction-kpi-dark:before{background:#28333E}
+.attraction-kpi span{display:block;font-size:9px;line-height:1.3;color:var(--muted);font-weight:850;text-transform:uppercase;letter-spacing:.065em}
+.attraction-kpi strong{display:block;font-size:29px;letter-spacing:-.035em;margin:10px 0 4px;line-height:1;color:var(--ink)}
+.attraction-kpi small{display:block;font-size:9.5px;color:#9097A0;line-height:1.35}
+.attraction-compare-grid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(330px,.85fr);gap:12px}
+.attraction-main-panel,.attraction-ratio-panel{min-width:0}
+.attraction-chart{height:320px}
+.attraction-insight{margin-top:12px;border:1px solid #E9E2DD;background:linear-gradient(135deg,#FFF9F5,#FFFDFC);border-radius:12px;padding:14px 16px;font-size:11px;line-height:1.6;color:#5F554F}
+.attraction-insight strong{color:var(--ink)}
+.attraction-source-note{margin:9px 2px 0;color:var(--muted);font-size:9.5px;line-height:1.5}
+.attraction-source-note strong{color:#626A73}
+@media(max-width:900px){.attraction-compare-grid{grid-template-columns:1fr}.attraction-summary-grid{grid-template-columns:1fr 1fr 1fr}}
+@media(max-width:620px){.attraction-summary-grid{grid-template-columns:1fr}.attraction-chart{height:300px}}
+
+/* Cristo × Bondinho — refinamentos: KPIs, sazonalidade e momentum */
+.attraction-summary-grid .attraction-kpi{
+  min-height:118px;padding:16px 16px 14px;border-radius:13px;
+}
+.attraction-summary-grid .attraction-kpi:before{display:none}
+.attraction-summary-grid .attraction-kpi:after{
+  content:"";position:absolute;left:16px;right:16px;top:0;height:2px;background:#C9CDD2;opacity:.95
+}
+.attraction-summary-grid .attraction-kpi-dark:after{background:#28333E}
+.attraction-summary-grid .attraction-kpi-orange:after{background:var(--orange)}
+.attraction-summary-grid .attraction-kpi .kpi-label{
+  font-size:10px;line-height:1.3;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.055em
+}
+.attraction-summary-grid .attraction-kpi strong{font-size:30px;margin:10px 0 3px;letter-spacing:-.035em;line-height:1}
+.attraction-summary-grid .attraction-kpi small{font-size:10.5px;color:#9298A0;line-height:1.3}
+.attraction-analysis-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(380px,.85fr);gap:12px;margin-top:12px}
+.attraction-analysis-grid .panel{min-width:0}
+.attraction-analysis-chart{height:300px}
+.attraction-season-summary{border-top:1px solid var(--line);margin-top:10px;padding-top:11px;font-size:10.5px;color:var(--muted);line-height:1.5}
+.attraction-season-summary strong{color:var(--ink)}
+.momentum-compare-kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0 10px}
+.momentum-mini-card{position:relative;border:1px solid var(--line);border-radius:11px;background:#FCFCFD;padding:11px 12px 10px;overflow:hidden}
+.momentum-mini-card:before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:#28333E}
+.momentum-mini-orange:before{background:var(--orange)}
+.momentum-mini-card span{display:block;font-size:9px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.055em}
+.momentum-mini-card strong{display:block;font-size:25px;line-height:1;margin:8px 0 4px;letter-spacing:-.03em}
+.momentum-mini-card small{font-size:9.5px;color:var(--muted);font-weight:700}
+.momentum-mini-card strong.positive{color:var(--green)!important}.momentum-mini-card strong.negative{color:var(--red)!important}.momentum-mini-card strong.neutral{color:var(--ink)!important}
+.attraction-momentum-chart{height:214px}
+.momentum-verdict{margin-top:10px;border-radius:10px;background:#F7F8F9;border:1px solid var(--line);padding:11px 12px;font-size:10.5px;line-height:1.5;color:#626A73}
+.momentum-verdict strong{color:var(--ink)}
+@media(max-width:980px){.attraction-analysis-grid{grid-template-columns:1fr}}
+@media(max-width:620px){.momentum-compare-kpis{grid-template-columns:1fr}.attraction-analysis-chart{height:280px}}

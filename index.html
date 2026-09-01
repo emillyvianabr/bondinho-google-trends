@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Google Trends — Bondinho / Pão de Açúcar</title>
+  <meta name="description" content="Dashboard de inteligência de mercado do Bondinho / Pão de Açúcar com dados do Google Trends.">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="stylesheet" href="bondinho-premium.css?v=20260901-2">
+</head>
+<body>
+  <div class="accent-bar"></div>
+  <header class="site-header">
+    <div class="shell header-grid">
+      <div class="title-block">
+        <div class="eyebrow"><span></span> Inteligência de Mercado · Google Trends</div>
+        <h1>Bondinho <em>/</em> Pão de Açúcar</h1>
+        <p>Interesse de busca, evolução temporal, sazonalidade e sinais de oportunidade por mercado.</p>
+      </div>
+      <div class="header-meta">
+        <div class="meta-label">Tema analisado</div>
+        <div class="meta-value">Pão de Açúcar</div>
+        <div class="meta-note">Índice Google Trends · 0–100</div>
+        <div class="meta-updated">Última atualização <strong id="lastUpdated">—</strong></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell dashboard">
+    <section class="filter-bar" aria-label="Filtros do dashboard">
+      <div class="filters-left">
+        <div class="field">
+          <label for="marketFilter">Mercado</label>
+          <select id="marketFilter"></select>
+        </div>
+        <div class="field field-small">
+          <label for="yearFilter">Ano</label>
+          <select id="yearFilter"></select>
+        </div>
+        <button id="resetFilters" class="ghost-button" type="button">Restaurar</button>
+      </div>
+      <div class="data-actions">
+        <span id="uploadStatus" class="data-status">Procurando base de dados…</span>
+        <details class="data-menu">
+          <summary>Base de dados</summary>
+          <div class="data-menu-panel">
+            <div class="menu-title">Baixar dados</div>
+            <a class="download-btn" href="downloads/dados.xlsx" download>Planilha completa (.xlsx)</a>
+            <button class="download-btn download-btn-light" id="downloadFilteredCsv" type="button">Dados filtrados (.csv)</button>
+            <div class="menu-title menu-title-spaced">Atualização da base</div>
+            <p>O dashboard usa a base automática em <code>data/dados.xlsx</code>.</p>
+            <p>Em contingência, <code>data/manual/dados.xlsx</code> tem prioridade.</p>
+            <label class="upload-btn" for="fileUpload">Testar planilha localmente</label>
+            <input type="file" id="fileUpload" accept=".xlsx,.xls,.csv" hidden>
+            <button id="showFormatHelp" class="link-btn" type="button">Ver formato aceito</button>
+            <div id="formatHelp" class="format-help hidden">
+              <code>data</code> · <code>mercado_codigo</code> · <code>mercado</code> · <code>indice_trends</code>
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section class="section-block overview-section">
+      <div class="section-intro">
+        <div>
+          <span class="section-kicker">Visão geral</span>
+          <h2>Desempenho do mercado selecionado</h2>
+        </div>
+        <p>Os indicadores abaixo respondem aos filtros de mercado e ano.</p>
+      </div>
+
+      <div class="kpi-grid">
+        <article class="kpi-card primary-kpi">
+          <div class="kpi-label">Interesse atual</div>
+          <strong id="kpiCurrent">—</strong>
+          <small id="kpiCurrentSub">último mês disponível</small>
+        </article>
+        <article class="kpi-card">
+          <div class="kpi-label">Interesse médio</div>
+          <strong id="kpiAvg">—</strong>
+          <small id="kpiAvgSub">—</small>
+        </article>
+        <article class="kpi-card">
+          <div class="kpi-label">Variação anual</div>
+          <strong id="kpiYoy">—</strong>
+          <small id="kpiYoySub">—</small>
+        </article>
+        <article class="kpi-card">
+          <div class="kpi-label">Momentum recente</div>
+          <strong id="kpiMomentum">—</strong>
+          <small>3 meses vs. 3 anteriores</small>
+        </article>
+        <article class="kpi-card">
+          <div class="kpi-label">Volatilidade</div>
+          <strong id="kpiVol">—</strong>
+          <small>coeficiente de variação</small>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel hero-chart-panel">
+      <div class="panel-head">
+        <div>
+          <span class="section-kicker">Tendência</span>
+          <h2>Interesse ao longo do tempo</h2>
+          <p>Evolução mensal do mercado selecionado. O intervalo abaixo afeta somente este gráfico.</p>
+        </div>
+        <div class="date-controls">
+          <div class="month-field"><label for="startDate">De</label><input type="month" id="startDate"></div>
+          <div class="month-field"><label for="endDate">Até</label><input type="month" id="endDate"></div>
+          <button id="clearDates" class="soft-button" type="button">Todo período</button>
+        </div>
+      </div>
+      <div class="chart-wrap chart-xl"><canvas id="trendChart"></canvas></div>
+    </section>
+
+    <section class="section-block">
+      <div class="section-intro">
+        <div>
+          <span class="section-kicker">Comportamento</span>
+          <h2>Como a demanda se distribui no tempo</h2>
+        </div>
+        <p>Comparação anual e padrão sazonal do mercado selecionado.</p>
+      </div>
+      <div class="two-col behavior-grid">
+        <article class="panel">
+          <div class="panel-head compact-head">
+            <div><span class="mini-label">Comparativo</span><h3 id="comparisonTitle">Ano selecionado × anterior</h3><p>Meses equivalentes no mesmo mercado.</p></div>
+          </div>
+          <div class="chart-wrap"><canvas id="comparisonChart"></canvas></div>
+        </article>
+        <article class="panel season-panel">
+          <div class="panel-head compact-head">
+            <div><span class="mini-label">Sazonalidade</span><h3>Perfil sazonal</h3><p>Índice do mês em relação à média histórica do mercado.</p></div>
+          </div>
+          <div class="seasonality" id="seasonalityGrid"></div>
+          <div class="season-legend"><span>Abaixo da média</span><div></div><span>Acima da média</span></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section-block compare-section">
+      <div class="section-intro compare-intro">
+        <div>
+          <span class="section-kicker">Comparação entre mercados</span>
+          <h2>Quem cresce, acelera e oscila mais</h2>
+        </div>
+        <p>Estes gráficos <strong>não respondem ao filtro de mercado</strong>. O filtro de ano continua ativo.</p>
+      </div>
+      <div class="comparison-grid">
+        <article class="panel ranking-panel">
+          <div class="panel-head compact-head">
+            <div><span class="mini-label">GeoMap</span><h3>Ranking de interesse por país</h3><p>Comparação na mesma escala geográfica do Google Trends.</p></div>
+          </div>
+          <div class="chart-wrap chart-tall"><canvas id="rankingChart"></canvas></div>
+        </article>
+        <article class="panel">
+          <div class="panel-head compact-head"><div><span class="mini-label">YoY</span><h3>Variação anual por mercado</h3><p>Ano selecionado contra o anterior.</p></div></div>
+          <div class="chart-wrap"><canvas id="yoyChart"></canvas></div>
+        </article>
+        <article class="panel">
+          <div class="panel-head compact-head"><div><span class="mini-label">Momentum</span><h3>Quem está acelerando agora?</h3><p>Últimos três meses contra os três anteriores.</p></div></div>
+          <div class="chart-wrap"><canvas id="momentumChart"></canvas></div>
+        </article>
+        <article class="panel">
+          <div class="panel-head compact-head"><div><span class="mini-label">Estabilidade</span><h3>Volatilidade do interesse</h3><p>Quanto maior, mais oscilante é a série.</p></div></div>
+          <div class="chart-wrap"><canvas id="volatilityChart"></canvas></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section-block geography-section">
+      <div class="section-intro">
+        <div>
+          <span class="section-kicker">Radar internacional</span>
+          <h2>Mercados além do recorte principal</h2>
+        </div>
+        <p>Use o GeoMap para encontrar países relevantes que ainda não fazem parte do monitoramento temporal.</p>
+      </div>
+      <div class="geo-layout">
+        <article class="panel geo-panel">
+          <div class="panel-head compact-head">
+            <div><span class="mini-label">Distribuição geográfica</span><h3>Países com maior interesse relativo</h3><p>Quanto mais intenso o laranja, maior o interesse relativo.</p></div>
+          </div>
+          <div class="geo-legend"><span><i class="geo-dot core"></i> Menor interesse</span><span><i class="geo-dot opportunity"></i> Maior interesse</span></div>
+          <div class="chart-wrap chart-tall"><div id="geoChart" class="geo-heatmap" role="img" aria-label="Mapa de calor mundial do interesse relativo por país"></div></div>
+        </article>
+        <article class="panel radar-panel">
+          <div class="radar-head">
+            <div><span class="mini-label">Novos mercados</span><h3>Países para acompanhar</h3><p id="geoRadarSubtitle">Ranking pelo interesse geográfico mais recente.</p></div>
+            <span class="radar-status" id="geoHistoryStatus">1 snapshot geográfico</span>
+          </div>
+          <div id="geoRadar" class="geo-radar"></div>
+          <p class="geo-footnote">Com dois ou mais snapshots em <code>geo_historico</code>, o ranking passa a priorizar automaticamente crescimento entre coletas.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section-block diagnostic-section">
+      <div class="section-intro">
+        <div><span class="section-kicker">Diagnóstico</span><h2>Meses que merecem investigação</h2></div>
+        <p>Picos ajudam a localizar períodos para cruzar com campanhas, férias, eventos e notícias.</p>
+      </div>
+      <div class="diagnostic-grid">
+        <article class="panel peaks-panel">
+          <div class="panel-head compact-head"><div><span class="mini-label">Top meses</span><h3>Maiores índices do período</h3></div></div>
+          <div class="peaks" id="peaksTable"></div>
+        </article>
+        <article class="insight-panel">
+          <span class="section-kicker light-kicker">Leitura automática</span>
+          <h3>O que o período está sinalizando?</h3>
+          <p id="autoInsight">—</p>
+        </article>
+      </div>
+    </section>
+
+
+    <section class="section-block attraction-compare-section" id="cristoBondinhoSection">
+      <div class="section-intro attraction-compare-intro">
+        <div>
+          <span class="section-kicker">Cristo × Bondinho</span>
+          <h2>Quem concentra mais interesse nas buscas?</h2>
+        </div>
+        <p>Comparação direta dos dois atrativos na mesma consulta do Google Trends. O mercado e o ano seguem os filtros do dashboard.</p>
+      </div>
+
+      <div class="attraction-summary-grid">
+        <article class="kpi-card attraction-kpi attraction-kpi-dark">
+          <div class="kpi-label">Cristo ÷ Bondinho</div>
+          <strong id="attractionRatio">—</strong>
+          <small id="attractionRatioSub">mercado selecionado</small>
+        </article>
+        <article class="kpi-card attraction-kpi attraction-kpi-orange">
+          <div class="kpi-label">Participação relativa do Cristo</div>
+          <strong id="attractionShare">—</strong>
+          <small id="attractionShareSub">entre os dois atrativos</small>
+        </article>
+        <article class="kpi-card attraction-kpi">
+          <div class="kpi-label">Diferença média</div>
+          <strong id="attractionGap">—</strong>
+          <small id="attractionGapSub">Cristo − Pão de Açúcar</small>
+        </article>
+      </div>
+
+      <div class="attraction-compare-grid">
+        <article class="panel attraction-main-panel">
+          <div class="panel-head compact-head">
+            <div>
+              <span class="mini-label">Evolução mensal</span>
+              <h3 id="attractionTrendTitle">Cristo × Bondinho</h3>
+              <p id="attractionTrendSubtitle">Os dois atrativos usam a mesma escala dentro do mercado selecionado.</p>
+            </div>
+          </div>
+          <div class="chart-wrap attraction-chart"><canvas id="attractionTrendChart"></canvas></div>
+        </article>
+
+        <article class="panel attraction-ratio-panel">
+          <div class="panel-head compact-head">
+            <div>
+              <span class="mini-label">Força relativa por mercado</span>
+              <h3>Quantas vezes o Cristo supera o Bondinho?</h3>
+              <p>A razão é usada para evitar comparar diretamente escalas 0–100 de consultas feitas separadamente.</p>
+            </div>
+          </div>
+          <div class="chart-wrap attraction-chart"><canvas id="attractionRatioChart"></canvas></div>
+        </article>
+      </div>
+
+      <div class="attraction-analysis-grid">
+        <article class="panel attraction-season-panel">
+          <div class="panel-head compact-head">
+            <div>
+              <span class="mini-label">Sazonalidade comparada</span>
+              <h3>Cristo × Bondinho ao longo do ano</h3>
+              <p>Índice de cada mês em relação à média histórica do próprio atrativo no mercado selecionado. 1,00 = mês típico.</p>
+            </div>
+          </div>
+          <div class="chart-wrap attraction-analysis-chart"><canvas id="attractionSeasonChart"></canvas></div>
+          <div class="attraction-season-summary" id="attractionSeasonSummary">—</div>
+        </article>
+
+        <article class="panel attraction-momentum-panel">
+          <div class="panel-head compact-head">
+            <div>
+              <span class="mini-label">Momentum</span>
+              <h3>Os dois estão acelerando ou desacelerando?</h3>
+              <p>Últimos 3 meses disponíveis contra os 3 anteriores, seguindo a mesma lógica do indicador principal.</p>
+            </div>
+          </div>
+          <div class="momentum-compare-kpis">
+            <div class="momentum-mini-card">
+              <span>Cristo Redentor</span>
+              <strong id="cristoMomentum">—</strong>
+              <small id="cristoMomentumStatus">—</small>
+            </div>
+            <div class="momentum-mini-card momentum-mini-orange">
+              <span>Bondinho</span>
+              <strong id="bondinhoMomentum">—</strong>
+              <small id="bondinhoMomentumStatus">—</small>
+            </div>
+          </div>
+          <div class="chart-wrap attraction-momentum-chart"><canvas id="attractionMomentumChart"></canvas></div>
+          <div class="momentum-verdict" id="attractionMomentumVerdict">—</div>
+        </article>
+      </div>
+
+      <div class="attraction-insight" id="attractionCompareInsight">—</div>
+      <p class="attraction-source-note"><strong>Como ler:</strong> dentro de cada mercado, Cristo e Pão de Açúcar são diretamente comparáveis porque foram coletados juntos. Entre mercados, o gráfico usa a razão Cristo/Bondinho — e não os índices brutos — para respeitar a normalização própria de cada consulta. A sazonalidade é normalizada pela média histórica de cada atrativo. <span id="attractionPartialNote"></span></p>
+    </section>
+
+    <details class="methodology">
+      <summary>
+        <div><span class="section-kicker">Metodologia</span><h2>Como interpretar estes dados</h2></div>
+        <span class="method-action">Abrir</span>
+      </summary>
+      <div class="method-body">
+        <div class="method-grid">
+          <article><span>01</span><h3>Por que o tema “Pão de Açúcar”?</h3><p>O dashboard usa o <strong>tema</strong> associado a Pão de Açúcar para representar o atrativo de forma mais ampla do que uma expressão literal como “Bondinho”. Isso é especialmente útil na análise internacional, em que o destino pode ser reconhecido por traduções e variações locais.</p></article>
+          <article><span>02</span><h3>Tema × termo de pesquisa</h3><p>Um <strong>termo</strong> acompanha uma expressão pesquisada. Um <strong>tema</strong> agrupa pesquisas relacionadas ao mesmo conceito, inclusive em idiomas diferentes. A composição exata do agrupamento não é exibida pelo Google como lista fechada.</p></article>
+          <article><span>03</span><h3>O que significa 0–100?</h3><p>Os valores são normalizados. <strong>100 representa o maior interesse relativo dentro da série analisada</strong>; não significa 100 buscas. Os demais pontos são escalados em relação a esse comportamento.</p></article>
+          <article><span>04</span><h3>Como comparar países?</h3><p>As séries temporais baixadas separadamente devem ser usadas para analisar evolução dentro de cada mercado. Para comparar nível de interesse entre países, o dashboard usa o <strong>GeoMap</strong>, onde todos estão na mesma consulta e escala.</p></article>
+        </div>
+        <div class="method-note"><strong>Leitura recomendada:</strong> use Trends como indicador de atenção digital e combine com PAX, vendas, origem dos visitantes e demais dados de mercado sempre que possível.</div>
+      </div>
+    </details>
+
+    <footer>
+      <span>Google Trends · Tema “Pão de Açúcar”</span>
+      <span>Base atualizada pelo arquivo <code>data/dados.xlsx</code></span>
+    </footer>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://www.gstatic.com/charts/loader.js"></script>
+  <script>window.geoChartsReady=new Promise(resolve=>{google.charts.load("current",{packages:["geochart"]});google.charts.setOnLoadCallback(resolve);});</script>
+  <script src="data.js"></script>
+  <script src="comparison-data.js"></script>
+  <script src="bondinho-premium.js?v=20260901-5"></script>
+  <script src="comparison-module.js?v=20260901-2"></script>
+</body>
+</html>
