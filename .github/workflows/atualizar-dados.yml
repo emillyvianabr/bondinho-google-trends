@@ -1,0 +1,34 @@
+name: Atualizar Google Trends
+
+on:
+  schedule:
+    - cron: "20 8 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: atualizar-google-trends
+  cancel-in-progress: false
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Coletar, validar e gerar arquivos
+        run: python scripts/atualizar.py
+      - name: Publicar somente quando houver mudança válida
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/dados.xlsx downloads/dados.xlsx data.js comparison-data.js
+          git diff --cached --quiet && exit 0
+          git commit -m "Atualiza dados do Google Trends"
+          git push
