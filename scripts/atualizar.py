@@ -16,9 +16,10 @@ DATA_XLSX = ROOT / "data" / "dados.xlsx"
 DOWNLOAD_XLSX = ROOT / "downloads" / "dados.xlsx"
 MANUAL_XLSX = ROOT / "data" / "manual" / "dados.xlsx"
 TERM = "Pão de Açúcar"
-# ID interno do Google Trends para "Pão de Açúcar — Assunto/Tema".
+# ID interno do Google Trends para
+# "Pão de Açúcar — Morro no Rio de Janeiro" (Tema).
 # O nome TERM continua sendo usado apenas para exibição no dashboard e Excel.
-TOPIC_ID = "/g/11c2kb99tt"
+TOPIC_ID = "/m/0634k2"
 COMPARE = ["Cristo Redentor", TOPIC_ID]
 START = "2024-01-01"
 MARKETS = {
