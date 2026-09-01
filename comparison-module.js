@@ -18,7 +18,13 @@
     return C.series.filter(r=>r.marketCode===code && (year==="ALL" || r.year===+year)).sort((a,b)=>a.date.localeCompare(b.date));
   }
   function allMarket(code){ return C.series.filter(r=>r.marketCode===code).sort((a,b)=>a.date.localeCompare(b.date)); }
-  function labelPeriod(year){ return year==="ALL"?"jan/2024–ago/2026":String(year); }
+  function labelPeriod(year){
+    if(year!=="ALL") return String(year);
+    const dates=[...C.series].sort((a,b)=>a.date.localeCompare(b.date));
+    if(!dates.length) return "todo o período";
+    const first=dates[0], last=dates.at(-1);
+    return `${monthNames[first.month-1].toLowerCase()}/${first.year}–${monthNames[last.month-1].toLowerCase()}/${last.year}`;
+  }
   function momentum(rows,key){
     if(rows.length<6) return NaN;
     const recent=avg(rows.slice(-3).map(r=>r[key]));
@@ -57,8 +63,11 @@
     $("#attractionGap").textContent=`${gap>=0?"+":""}${fmt(gap,1)}`;
     $("#attractionGapSub").textContent=`pontos médios · ${marketName}`;
     $("#attractionTrendTitle").textContent=`Cristo × Bondinho · ${marketName}`;
-    $("#attractionTrendSubtitle").textContent=`Evolução mensal · ${period}${year==="2026"?" · agosto parcial":""}`;
-    $("#attractionPartialNote").textContent=year==="2026"||year==="ALL"?" Agosto/2026 é um mês ainda em andamento na data da coleta (12/08/2026), portanto pode pressionar o momentum para baixo.":"";
+    const updated=C.updated?new Date(`${C.updated}T12:00:00`):null;
+    const lastRow=rows.at(-1);
+    const partial=updated&&lastRow&&lastRow.year===updated.getFullYear()&&lastRow.month===updated.getMonth()+1;
+    $("#attractionTrendSubtitle").textContent=`Evolução mensal · ${period}${partial?` · ${monthNames[lastRow.month-1].toLowerCase()} parcial`:""}`;
+    $("#attractionPartialNote").textContent=partial?` ${monthNames[lastRow.month-1]}/${lastRow.year} é um mês ainda em andamento na data da coleta (${C.updated.split("-").reverse().join("/")}), portanto pode pressionar o momentum para baixo.`:"";
 
     if(trendChart) trendChart.destroy();
     trendChart=new Chart($("#attractionTrendChart"),{

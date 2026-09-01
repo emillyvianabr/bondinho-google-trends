@@ -252,7 +252,9 @@ function updateGeo(){
       const table=new google.visualization.DataTable();
       table.addColumn("string","País");
       table.addColumn("number","Interesse relativo");
-      table.addRows(data.map(x=>[x.country,x.value]));
+      // Códigos ISO evitam que o GeoChart tente geocodificar nomes traduzidos
+      // e permitem o mapa mundial sem uma chave da API do Google Maps.
+      table.addRows(data.map(x=>[x.code||x.country,x.value]));
       const chart=new google.visualization.GeoChart(host);
       chart.draw(table,{
         backgroundColor:"transparent",
