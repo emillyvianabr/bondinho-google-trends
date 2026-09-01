@@ -99,11 +99,28 @@ def collect_series(py):
 
 def collect_geo(py):
     def fetch():
-        py.build_payload([TOPIC_ID], timeframe=f"{date.today().year}-01-01 {date.today().isoformat()}")
-        return py.interest_by_region(resolution="COUNTRY", inc_low_vol=True, inc_geo_code=False)
+        py.build_payload(
+            [TOPIC_ID],
+            timeframe=f"{date.today().year}-01-01 {date.today().isoformat()}",
+            geo="",
+        )
+        return py.interest_by_region(
+            resolution="COUNTRY", inc_low_vol=True, inc_geo_code=True
+        )
     raw = request_with_retry(fetch).reset_index()
     country_col = raw.columns[0]
-    return pd.DataFrame({"pais": raw[country_col], "indice_trends_num": pd.to_numeric(raw[TOPIC_ID], errors="coerce")})
+    code_col = "geoCode" if "geoCode" in raw.columns else None
+    result = pd.DataFrame({
+        "pais": raw[country_col],
+        "codigo_pais": raw[code_col] if code_col else "",
+        "indice_trends_num": pd.to_numeric(raw[TOPIC_ID], errors="coerce"),
+    })
+    valid_codes = result["codigo_pais"].astype(str).str.fullmatch(r"[A-Z]{2}")
+    expected = {"BR", "AR", "CL", "CO", "UY", "US", "FR"}
+    returned = set(result.loc[valid_codes, "codigo_pais"])
+    if len(result) < 30 or len(returned & expected) < 4:
+        raise RuntimeError("A resposta geográfica não contém uma lista mundial de países.")
+    return result
 
 
 def existing_geo():
@@ -114,7 +131,9 @@ def existing_geo():
     if not sheets:
         return pd.DataFrame()
     old = pd.read_excel(DATA_XLSX, sheet_name=sheets[-1])
-    return old[["pais", "indice_trends_num"]]
+    if "codigo_pais" not in old.columns:
+        old["codigo_pais"] = ""
+    return old[["pais", "codigo_pais", "indice_trends_num"]]
 
 
 def derived_tables(series):
@@ -175,7 +194,8 @@ def write_outputs(series, geo, comparison):
     series_json = [{"date": r.data.strftime("%Y-%m-%d"), "year": int(r.ano), "month": int(r.mes_num),
                     "marketCode": r.mercado_codigo, "market": r.mercado, "value": float(r.indice_trends)}
                    for r in series.itertuples()]
-    geo_json = [{"country": r.pais, "value": None if pd.isna(r.indice_trends_num) else float(r.indice_trends_num),
+    geo_json = [{"country": r.pais, "code": getattr(r, "codigo_pais", ""),
+                 "value": None if pd.isna(r.indice_trends_num) else float(r.indice_trends_num),
                  "display": "" if pd.isna(r.indice_trends_num) else str(int(r.indice_trends_num))} for r in geo.itertuples()]
     hist_json = [{"date": pd.to_datetime(r.data_snapshot).strftime("%Y-%m-%d"), "country": r.pais,
                   "value": None if pd.isna(r.indice_trends_num) else float(r.indice_trends_num)} for r in history.itertuples()]
@@ -198,7 +218,9 @@ def main():
     py = client()
     series, comparison = collect_series(py)
     try:
-        geo = collect_geo(py)
+        # Uma sessão nova impede que o recorte do último mercado temporal
+        # (por exemplo, França) contamine a consulta mundial por país.
+        geo = collect_geo(client())
     except Exception as exc:
         geo = existing_geo()
         if geo.empty:
