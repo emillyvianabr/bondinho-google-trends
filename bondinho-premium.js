@@ -64,41 +64,33 @@ function lineOptions(){
 function barColors(values){ return values.map(v=>v>=0 ? ORANGE : "#c5c8cc"); }
 
 function updateKPIs(){
-  const code=selectedMarket(), year=selectedYear();
-  let base = marketRows(code);
-  if(year) base=base.filter(r=>r.year===year);
-  const vals=base.map(r=>r.value);
+  const code=selectedMarket();
+  const base=[...marketRows(code)].sort((a,b)=>a.date.localeCompare(b.date));
+  const last12=base.slice(-12), previous12=base.slice(-24,-12);
+  const vals=last12.map(r=>r.value);
   const avg=mean(vals);
   document.querySelector("#kpiAvg").textContent=fmt(avg);
-  document.querySelector("#kpiAvgSub").textContent=year ? `${year} · ${base[0]?.market||""}` : "período completo";
+  document.querySelector("#kpiAvgSub").textContent=`média móvel de 12 meses · ${base[0]?.market||""}`;
 
-  let yoy=NaN;
-  if(year){
-    const cur=marketRows(code).filter(r=>r.year===year);
-    const prev=marketRows(code).filter(r=>r.year===year-1);
-    if(cur.length && prev.length){
-      const [c,p]=monthsComparable(cur,prev); yoy=mean(c.map(r=>r.value))/mean(p.map(r=>r.value))-1;
-    }
-  }
+  const previousAvg=mean(previous12.map(r=>r.value));
+  const yoy=last12.length===12&&previous12.length===12&&previousAvg!==0 ? avg/previousAvg-1 : NaN;
   const yoyEl=document.querySelector("#kpiYoy"); yoyEl.textContent=pct(yoy); yoyEl.className=colorMetric(yoy);
-  document.querySelector("#kpiYoySub").textContent=year?`vs. ${year-1}`:"selecione um ano";
+  document.querySelector("#kpiYoySub").textContent="12 meses vs. 12 anteriores";
 
   let momentum=NaN;
-  if(year){
-    const arr=marketRows(code).filter(r=>r.year===year).sort((a,b)=>a.month-b.month);
-    if(arr.length>=6){
-      momentum=mean(arr.slice(-3).map(r=>r.value))/mean(arr.slice(-6,-3).map(r=>r.value))-1;
-    }
+  if(base.length>=6){
+    const prior3=mean(base.slice(-6,-3).map(r=>r.value));
+    if(prior3!==0) momentum=mean(base.slice(-3).map(r=>r.value))/prior3-1;
   }
   const mEl=document.querySelector("#kpiMomentum"); mEl.textContent=pct(momentum); mEl.className=colorMetric(momentum);
 
-  const current=base.length ? [...base].sort((a,b)=>a.date.localeCompare(b.date)).at(-1) : null;
+  const current=base.at(-1)||null;
   const currentEl=document.querySelector("#kpiCurrent");
   const currentSub=document.querySelector("#kpiCurrentSub");
   if(currentEl) currentEl.textContent=current?fmt(current.value,0):"—";
   if(currentSub) currentSub.textContent=current?`${months[current.month-1]}/${current.year} · último mês disponível`:"último mês disponível";
 
-  const cv=vals.length>1 && mean(vals)!==0 ? stdev(vals)/mean(vals) : NaN;
+  const cv=vals.length>1 && avg!==0 ? stdev(vals)/avg : NaN;
   document.querySelector("#kpiVol").textContent=Number.isFinite(cv)?pct(cv):"—";
 }
 
