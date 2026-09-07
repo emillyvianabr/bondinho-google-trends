@@ -83,12 +83,28 @@ def existing_series():
     return old
 
 
-def collect_series(py):
+def same_values(series, first_code, second_code):
+    first = series[series["mercado_codigo"] == first_code][
+        ["data", "indice_trends"]
+    ].sort_values("data")
+    second = series[series["mercado_codigo"] == second_code][
+        ["data", "indice_trends"]
+    ].sort_values("data")
+    paired = first.merge(second, on="data", suffixes=("_first", "_second"))
+    return len(paired) >= 12 and paired["indice_trends_first"].equals(
+        paired["indice_trends_second"]
+    )
+
+
+def collect_series():
     rows, comparison = [], []
     old = existing_series()
     for code, (market, geo) in MARKETS.items():
+        # O pytrends mantém o último `geo` quando recebe uma string vazia.
+        # Uma sessão nova por mercado impede Mundo de herdar França.
+        market_py = client()
         try:
-            one = monthly_interest(py, [TOPIC_ID], geo)
+            one = monthly_interest(market_py, [TOPIC_ID], geo)
             for dt, value in one[TOPIC_ID].items():
                 rows.append({"data": dt, "ano": dt.year, "mes_num": dt.month,
                              "mes": dt.strftime("%b").title(), "mercado_codigo": code,
@@ -101,7 +117,7 @@ def collect_series(py):
             rows.extend(fallback.to_dict("records"))
             print(f"AVISO: {market} sem série nova; histórico anterior preservado. Motivo: {exc}")
         try:
-            both = monthly_interest(py, COMPARE, geo)
+            both = monthly_interest(market_py, COMPARE, geo)
             for dt, values in both.iterrows():
                 comparison.append({"date": dt.strftime("%Y-%m-%d"), "year": dt.year,
                                    "month": dt.month, "marketCode": code, "market": market,
@@ -109,7 +125,14 @@ def collect_series(py):
         except Exception as exc:
             print(f"AVISO: comparação de {market} preservada no arquivo publicado. Motivo: {exc}")
         time.sleep(2)
-    return pd.DataFrame(rows), comparison
+    series = pd.DataFrame(rows)
+    for code in (c for c in MARKETS if c != "WORLD"):
+        if same_values(series, "WORLD", code):
+            raise RuntimeError(
+                f"Validação falhou: Mundo veio idêntico a {MARKETS[code][0]}. "
+                "Os arquivos publicados foram preservados."
+            )
+    return series, comparison
 
 
 def collect_geo(py):
@@ -230,8 +253,7 @@ def main():
         shutil.copy2(MANUAL_XLSX, DOWNLOAD_XLSX)
         print("Base manual publicada; coleta automática ignorada.")
         return
-    py = client()
-    series, comparison = collect_series(py)
+    series, comparison = collect_series()
     try:
         # Uma sessão nova impede que o recorte do último mercado temporal
         # (por exemplo, França) contamine a consulta mundial por país.
@@ -245,6 +267,7 @@ def main():
         raise RuntimeError("Validação falhou; arquivos publicados foram preservados.")
     write_outputs(series, geo, comparison)
     print(f"Atualização concluída em {date.today():%d/%m/%Y}.")
+
 
 if __name__ == "__main__":
     main()
