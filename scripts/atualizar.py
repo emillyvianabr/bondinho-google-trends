@@ -20,7 +20,9 @@ TERM = "Pão de Açúcar"
 # "Pão de Açúcar — Morro no Rio de Janeiro" (Tema).
 # O nome TERM continua sendo usado apenas para exibição no dashboard e Excel.
 TOPIC_ID = "/m/0634k2"
-COMPARE = ["Cristo Redentor", TOPIC_ID]
+# "Cristo Redentor — Estátua" no Google Trends.
+CRISTO_TOPIC_ID = "/m/03gytw"
+COMPARE = [CRISTO_TOPIC_ID, TOPIC_ID]
 # A consulta original sempre considera 01/01/2023 até a data atual.
 # O dashboard publicado começa em 2024, mas 2023 participa da normalização.
 QUERY_START = "2023-01-01"
