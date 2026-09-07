@@ -21,7 +21,10 @@ TERM = "Pão de Açúcar"
 # O nome TERM continua sendo usado apenas para exibição no dashboard e Excel.
 TOPIC_ID = "/m/0634k2"
 COMPARE = ["Cristo Redentor", TOPIC_ID]
-START = "2024-01-01"
+# A consulta original sempre considera 01/01/2023 até a data atual.
+# O dashboard publicado começa em 2024, mas 2023 participa da normalização.
+QUERY_START = "2023-01-01"
+DISPLAY_START = "2024-01-01"
 MARKETS = {
     "BR": ("Brasil", "BR"), "AR": ("Argentina", "AR"),
     "CL": ("Chile", "CL"), "CO": ("Colômbia", "CO"),
@@ -49,7 +52,7 @@ def request_with_retry(fn, attempts=4):
 
 
 def monthly_interest(py, terms, geo):
-    timeframe = f"{START} {date.today().isoformat()}"
+    timeframe = f"{QUERY_START} {date.today().isoformat()}"
     def fetch():
         py.build_payload(terms, timeframe=timeframe, geo=geo)
         return py.interest_over_time()
@@ -58,7 +61,18 @@ def monthly_interest(py, terms, geo):
         raise RuntimeError(f"Série vazia para {geo or 'Mundo'}: {terms}")
     raw = raw.drop(columns=["isPartial"], errors="ignore")
     raw.index = pd.to_datetime(raw.index)
-    return raw.resample("MS").mean().round().astype(int)
+    raw = raw[raw.index >= pd.Timestamp(QUERY_START)]
+    monthly = raw.resample("MS").mean()
+
+    # O Google devolve pontos semanais nesse intervalo. Depois de consolidar
+    # por mês, voltamos a escalar o conjunto para 0–100, como na exportação
+    # mensal usada na base original. Em comparações, uma única escala global
+    # preserva a relação entre os dois temas.
+    maximum = monthly[terms].max().max()
+    if pd.notna(maximum) and maximum > 0:
+        monthly[terms] = monthly[terms] * (100 / maximum)
+    monthly = monthly[monthly.index >= pd.Timestamp(DISPLAY_START)]
+    return monthly.round().astype(int)
 
 
 def existing_series():
@@ -231,7 +245,6 @@ def main():
         raise RuntimeError("Validação falhou; arquivos publicados foram preservados.")
     write_outputs(series, geo, comparison)
     print(f"Atualização concluída em {date.today():%d/%m/%Y}.")
-
 
 if __name__ == "__main__":
     main()
