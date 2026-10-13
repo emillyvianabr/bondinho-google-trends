@@ -2,7 +2,7 @@ name: Atualizar Google Trends
 
 on:
   schedule:
-    - cron: "20 8 1 * *"
+    - cron: "20 8 1 * *"   # dia 1 de cada mês
   workflow_dispatch:
 
 permissions:
@@ -28,7 +28,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/dados.xlsx downloads/dados.xlsx data.js comparison-data.js
+          git add data/dados.xlsx data/historico downloads/dados.xlsx data.js comparison-data.js
           git diff --cached --quiet && exit 0
           git commit -m "Atualiza dados do Google Trends"
           git push
