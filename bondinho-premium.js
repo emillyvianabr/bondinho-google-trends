@@ -1,5 +1,6 @@
 let D = window.TRENDS_DATA || {series:[],geo2026:[],geoHistory:[],term:'Pão de Açúcar',updated:null};
-const ORANGE = "#FF6600", ORANGE2 = "#FDBA8C", DARK = "#CC5200", MUTED="#AAB0B7", GREEN="#23885A", RED="#C94A3A";
+// Parque Bondinho (laranja) + Grupo Iter (apoio)
+const ORANGE = "#FF6600", ORANGE2 = "#FDBA8C", DARK = "#CC5200", MUTED="#7693A1", GREEN="#1F8A68", RED="#EB4A75", INK="#233744", GRID="#E8EEF1", NEG_BAR="#B1C6CE";
 const months = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
 let charts = {};
 
@@ -40,18 +41,18 @@ function setupFilters(){
   endDate.min = dates[0].slice(0,7); endDate.max = dates.at(-1).slice(0,7);
 }
 
-Chart.defaults.font.family = 'Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif';
-Chart.defaults.color = "#66707B";
+Chart.defaults.font.family = 'Stolzl, system-ui, -apple-system, "Segoe UI", sans-serif';
+Chart.defaults.color = "#53778B";
 Chart.defaults.font.size = 12;
 
 function destroy(name){ if(charts[name]) charts[name].destroy(); }
 function standardOptions(horizontal=false){
   return {
     responsive:true, maintainAspectRatio:false,
-    plugins:{legend:{display:false},tooltip:{backgroundColor:"#1D232A",padding:11,titleFont:{weight:"700"}}},
+    plugins:{legend:{display:false},tooltip:{backgroundColor:INK,padding:11,titleFont:{weight:"700"}}},
     scales:{
       x:{grid:{display:false},border:{display:false},ticks:{maxRotation:0,autoSkip:true}},
-      y:{grid:{color:"#EEF0F2"},border:{display:false},beginAtZero:true}
+      y:{grid:{color:GRID},border:{display:false},beginAtZero:true}
     }
   };
 }
@@ -61,7 +62,7 @@ function lineOptions(){
   o.scales.y.title={display:true,text:"Índice de interesse"};
   return o;
 }
-function barColors(values){ return values.map(v=>v>=0 ? ORANGE : "#c5c8cc"); }
+function barColors(values){ return values.map(v=>v>=0 ? ORANGE : NEG_BAR); }
 
 function updateKPIs(){
   const code=selectedMarket();
@@ -111,7 +112,7 @@ function updateTrend(){
   charts.trend=new Chart(document.querySelector("#trendChart"),{
     type:"line",
     data:{labels:chartRows.map(r=>new Date(r.date+"T00:00:00").toLocaleDateString("pt-BR",{month:"short",year:"2-digit"})),
-      datasets:[{data:chartRows.map(r=>r.value),borderColor:ORANGE,backgroundColor:"rgba(245,123,37,.08)",pointRadius:2,pointHoverRadius:5,borderWidth:2.4,tension:.28,fill:true}]},
+      datasets:[{data:chartRows.map(r=>r.value),borderColor:ORANGE,backgroundColor:"rgba(255,102,0,.08)",pointRadius:2,pointHoverRadius:5,borderWidth:2.4,tension:.28,fill:true}]},
     options:lineOptions()
   });
 }
@@ -138,9 +139,18 @@ function updateComparison(){
 }
 
 function seasonIndexFor(code){
-  const data=marketRows(code);
-  const overall=mean(data.map(r=>r.value));
-  return months.map((_,i)=>mean(data.filter(r=>r.month===i+1).map(r=>r.value))/overall);
+  // Cada ano é dividido pela própria média e só anos completos (12 meses) entram:
+  // assim o crescimento do ano e o ano parcial não viram "sazonalidade".
+  const data=marketRows(code), byYear={};
+  data.forEach(r=>{(byYear[r.year]=byYear[r.year]||[]).push(r);});
+  let years=Object.keys(byYear).filter(y=>byYear[y].length>=12);
+  if(!years.length) years=Object.keys(byYear);
+  const acc=Array.from({length:12},()=>[]);
+  years.forEach(y=>{
+    const m=mean(byYear[y].map(r=>r.value)); if(!m) return;
+    byYear[y].forEach(r=>acc[r.month-1].push(r.value/m));
+  });
+  return acc.map(a=>a.length?mean(a):NaN);
 }
 function seasonColor(v){
   const t=Math.max(0,Math.min(1,(v-.65)/.7));
@@ -198,13 +208,13 @@ function makeBar(id,key,data,isPct=false){
     type:"bar",
     data:{labels:data.map(x=>x.name),datasets:[{data:data.map(x=>isPct?x.v*100:x.v),backgroundColor:isPct?barColors(data.map(x=>x.v)):ORANGE,borderRadius:7,borderSkipped:false,barThickness:data.length>=10?14:18,maxBarThickness:20}]},
     options:{...standardOptions(),indexAxis:data.length>=6?"y":"x",
-      plugins:{legend:{display:false},tooltip:{backgroundColor:"#1D232A",callbacks:{label:(ctx)=>isPct?`${ctx.raw>=0?"+":""}${fmt(ctx.raw)}%`:fmt(ctx.raw)}}},
+      plugins:{legend:{display:false},tooltip:{backgroundColor:INK,callbacks:{label:(ctx)=>isPct?`${ctx.raw>=0?"+":""}${fmt(ctx.raw)}%`:fmt(ctx.raw)}}},
       scales:data.length>=6?{
-        x:{grid:{color:"#EEF0F2"},border:{display:false},beginAtZero:true,ticks:{font:{size:11},padding:6,callback:v=>isPct?`${v}%`:v}},
+        x:{grid:{color:GRID},border:{display:false},beginAtZero:true,ticks:{font:{size:11},padding:6,callback:v=>isPct?`${v}%`:v}},
         y:{grid:{display:false},border:{display:false},ticks:{font:{size:11},padding:7}}
       }:{
         x:{grid:{display:false},border:{display:false},ticks:{font:{size:11},padding:7}},
-        y:{grid:{color:"#EEF0F2"},border:{display:false},beginAtZero:true,ticks:{font:{size:11},padding:6,callback:v=>isPct?`${v}%`:v}}
+        y:{grid:{color:GRID},border:{display:false},beginAtZero:true,ticks:{font:{size:11},padding:6,callback:v=>isPct?`${v}%`:v}}
       }
     }
   });
@@ -239,27 +249,8 @@ function isCoreCountry(country){return CORE_GEO.has(normalizeCountryName(country
 function updateGeo(){
   const host=document.querySelector("#geoChart");
   const data=(D.geo2026||[]).filter(x=>Number.isFinite(x.value));
-  if(host&&window.geoChartsReady){
-    window.geoChartsReady.then(()=>{
-      const table=new google.visualization.DataTable();
-      table.addColumn("string","País");
-      table.addColumn("number","Interesse relativo");
-      // Códigos ISO evitam que o GeoChart tente geocodificar nomes traduzidos
-      // e permitem o mapa mundial sem uma chave da API do Google Maps.
-      table.addRows(data.map(x=>[x.code||x.country,x.value]));
-      const chart=new google.visualization.GeoChart(host);
-      chart.draw(table,{
-        backgroundColor:"transparent",
-        datalessRegionColor:"#ECEFF2",
-        defaultColor:"#FFF0E6",
-        colorAxis:{minValue:0,maxValue:100,colors:["#FFF0E6","#FFB078","#FF6600","#CC5200"]},
-        legend:"none",
-        region:"world",
-        resolution:"countries",
-        tooltip:{textStyle:{fontName:"Arial",fontSize:12}}
-      });
-    });
-  }
+  // Mapa próprio (D3) com zoom; destaca o país do filtro "Mercado" quando ele existe no GeoMap.
+  if(host&&window.GeoMap) window.GeoMap.render(host,data,selectedMarket());
   updateGeoRadar();
 }
 
@@ -395,8 +386,9 @@ function geoRowsFromWorksheet(ws){
   const ipais=c("pais","country","mercado");
   const ival=c("indice_trends_num","indice_trends","value","valor");
   const idisp=c("indice_trends_exibicao","display");
+  const icode=c("codigo_pais","code","codigo","iso2","geo_code"); // código ISO de 2 letras: o mapa depende dele
   if(ipais===undefined||ival===undefined)return [];
-  return matrix.slice(1).map(r=>({country:String(r[ipais]??"").trim(),value:Number(r[ival]),display:idisp===undefined?String(r[ival]??""):String(r[idisp]??"")})).filter(x=>x.country&&Number.isFinite(x.value));
+  return matrix.slice(1).map(r=>({country:String(r[ipais]??"").trim(),code:icode===undefined?"":String(r[icode]??"").trim().toUpperCase(),value:Number(r[ival]),display:idisp===undefined?String(r[ival]??""):String(r[idisp]??"")})).filter(x=>x.country&&Number.isFinite(x.value));
 }
 function geoHistoryFromWorksheet(ws){
   if(!ws)return [];

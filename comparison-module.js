@@ -2,7 +2,7 @@
   const C = window.ATTRACTION_TRENDS_DATA;
   if(!C || !Array.isArray(C.series) || !C.series.length) return;
 
-  const DARK="#28333E", ORANGE="#FF6600", MUTED="#9AA1A9", GRID="#ECEEF0", GREEN="#23885A", RED="#C94A3A";
+  const DARK="#233744", ORANGE="#FF6600", MUTED="#7693A1", GRID="#E8EEF1", GREEN="#1F8A68", RED="#EB4A75";
   const monthNames=["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
   const marketOrder=["WORLD","BR","AR","CL","CO","UY","US","FR"];
   let trendChart=null, ratioChart=null, seasonChart=null, momentumChart=null;
@@ -32,12 +32,18 @@
     return !Number.isFinite(previous)||previous===0?NaN:recent/previous-1;
   }
   function seasonality(code,key){
-    const data=allMarket(code);
-    const overall=avg(data.map(r=>r[key]));
-    return monthNames.map((_,i)=>{
-      const vals=data.filter(r=>r.month===i+1).map(r=>r[key]);
-      return !vals.length||!Number.isFinite(overall)||overall===0?NaN:avg(vals)/overall;
+    // Mesmo método do perfil sazonal do dashboard: cada ano é dividido pela própria média
+    // e só anos completos (12 meses) entram, para o crescimento do ano não virar sazonalidade.
+    const data=allMarket(code), byYear={};
+    data.forEach(r=>{(byYear[r.year]=byYear[r.year]||[]).push(r);});
+    let years=Object.keys(byYear).filter(y=>byYear[y].length>=12);
+    if(!years.length) years=Object.keys(byYear);
+    const acc=Array.from({length:12},()=>[]);
+    years.forEach(y=>{
+      const m=avg(byYear[y].map(r=>r[key])); if(!m) return;
+      byYear[y].forEach(r=>acc[r.month-1].push(r[key]/m));
     });
+    return acc.map(a=>a.length?avg(a):NaN);
   }
   function comparableMomentumRows(code,year){
     let rows=filtered(code,year);
@@ -76,7 +82,7 @@
         {label:"Cristo Redentor",data:rows.map(r=>r.cristo),borderColor:DARK,backgroundColor:DARK,pointRadius:2.5,pointHoverRadius:5,borderWidth:2.7,tension:.22},
         {label:"Pão de Açúcar / Bondinho",data:rows.map(r=>r.bondinho),borderColor:ORANGE,backgroundColor:ORANGE,pointRadius:2.5,pointHoverRadius:5,borderWidth:2.7,tension:.22}
       ]},
-      options:{responsive:true,maintainAspectRatio:false,interaction:{mode:"index",intersect:false},plugins:{legend:{position:"top",align:"start",labels:{usePointStyle:true,pointStyle:"circle",boxWidth:7,boxHeight:7,padding:16}},tooltip:{backgroundColor:"#1D232A",callbacks:{label:c=>`${c.dataset.label}: ${fmt(c.raw,0)}`}}},scales:{x:{grid:{display:false},ticks:{font:{size:9},maxTicksLimit:12,maxRotation:0,minRotation:0}},y:{beginAtZero:true,suggestedMax:100,grid:{color:GRID},border:{display:false},ticks:{font:{size:9}}}}}
+      options:{responsive:true,maintainAspectRatio:false,interaction:{mode:"index",intersect:false},plugins:{legend:{position:"top",align:"start",labels:{usePointStyle:true,pointStyle:"circle",boxWidth:7,boxHeight:7,padding:16}},tooltip:{backgroundColor:"#233744",callbacks:{label:c=>`${c.dataset.label}: ${fmt(c.raw,0)}`}}},scales:{x:{grid:{display:false},ticks:{font:{size:9},maxTicksLimit:12,maxRotation:0,minRotation:0}},y:{beginAtZero:true,suggestedMax:100,grid:{color:GRID},border:{display:false},ticks:{font:{size:9}}}}}
     });
 
     const ranking=marketOrder.map(code=>{
@@ -88,11 +94,11 @@
     if(ratioChart) ratioChart.destroy();
     ratioChart=new Chart($("#attractionRatioChart"),{
       type:"bar",
-      data:{labels:ranking.map(r=>r.name),datasets:[{label:"Cristo ÷ Bondinho",data:ranking.map(r=>r.ratio),backgroundColor:ranking.map(r=>r.code===market?ORANGE:"#D7DCE1"),borderRadius:5,maxBarThickness:22}]},
-      options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:"#1D232A",callbacks:{label:c=>`${fmt(c.raw,1)}× o interesse relativo do Bondinho`}}},scales:{x:{beginAtZero:true,grid:{color:GRID},border:{display:false},ticks:{callback:v=>`${v}×`,font:{size:9}}},y:{grid:{display:false},border:{display:false},ticks:{font:{size:9.5}}}}}
+      data:{labels:ranking.map(r=>r.name),datasets:[{label:"Cristo ÷ Bondinho",data:ranking.map(r=>r.ratio),backgroundColor:ranking.map(r=>r.code===market?ORANGE:"#D5DEE3"),borderRadius:5,maxBarThickness:22}]},
+      options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:"#233744",callbacks:{label:c=>`${fmt(c.raw,1)}× o interesse relativo do Bondinho`}}},scales:{x:{beginAtZero:true,grid:{color:GRID},border:{display:false},ticks:{callback:v=>`${v}×`,font:{size:9}}},y:{grid:{display:false},border:{display:false},ticks:{font:{size:9.5}}}}}
     });
 
-    // Sazonalidade: sempre histórico completo para revelar padrão recorrente.
+    // Sazonalidade: só anos completos, cada ano dividido pela própria média (igual ao perfil sazonal).
     const cSeason=seasonality(market,"cristo"), bSeason=seasonality(market,"bondinho");
     if(seasonChart) seasonChart.destroy();
     seasonChart=new Chart($("#attractionSeasonChart"),{
@@ -100,9 +106,9 @@
       data:{labels:monthNames,datasets:[
         {label:"Cristo Redentor",data:cSeason,borderColor:DARK,backgroundColor:DARK,pointRadius:3,pointHoverRadius:5,borderWidth:2.5,tension:.25},
         {label:"Bondinho",data:bSeason,borderColor:ORANGE,backgroundColor:ORANGE,pointRadius:3,pointHoverRadius:5,borderWidth:2.5,tension:.25},
-        {label:"Média histórica",data:monthNames.map(()=>1),borderColor:MUTED,pointRadius:0,borderWidth:1.2,borderDash:[5,5]}
+        {label:"Mês típico (1,00)",data:monthNames.map(()=>1),borderColor:MUTED,pointRadius:0,borderWidth:1.2,borderDash:[5,5]}
       ]},
-      options:{responsive:true,maintainAspectRatio:false,interaction:{mode:"index",intersect:false},plugins:{legend:{position:"top",align:"start",labels:{usePointStyle:true,boxWidth:7,boxHeight:7,padding:14}},tooltip:{backgroundColor:"#1D232A",callbacks:{label:c=>`${c.dataset.label}: ${fmt(c.raw,2)}`}}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{grid:{color:GRID},border:{display:false},ticks:{font:{size:9},callback:v=>fmt(v,1)}}}}
+      options:{responsive:true,maintainAspectRatio:false,interaction:{mode:"index",intersect:false},plugins:{legend:{position:"top",align:"start",labels:{usePointStyle:true,boxWidth:7,boxHeight:7,padding:14}},tooltip:{backgroundColor:"#233744",callbacks:{label:c=>`${c.dataset.label}: ${fmt(c.raw,2)}`}}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{grid:{color:GRID},border:{display:false},ticks:{font:{size:9},callback:v=>fmt(v,2)}}}}
     });
     const cBest=cSeason.indexOf(Math.max(...cSeason.filter(Number.isFinite))), bBest=bSeason.indexOf(Math.max(...bSeason.filter(Number.isFinite)));
     const cLow=cSeason.indexOf(Math.min(...cSeason.filter(Number.isFinite))), bLow=bSeason.indexOf(Math.min(...bSeason.filter(Number.isFinite)));
@@ -127,7 +133,7 @@
         {label:"Cristo Redentor",data:[cPrev,cRecent],backgroundColor:DARK,borderRadius:5,maxBarThickness:38},
         {label:"Bondinho",data:[bPrev,bRecent],backgroundColor:ORANGE,borderRadius:5,maxBarThickness:38}
       ]},
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"top",align:"start",labels:{usePointStyle:true,boxWidth:7,boxHeight:7,padding:14}},tooltip:{backgroundColor:"#1D232A",callbacks:{label:c=>`${c.dataset.label}: ${fmt(c.raw,1)}`}}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{beginAtZero:true,grid:{color:GRID},border:{display:false},ticks:{font:{size:9}}}}}
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"top",align:"start",labels:{usePointStyle:true,boxWidth:7,boxHeight:7,padding:14}},tooltip:{backgroundColor:"#233744",callbacks:{label:c=>`${c.dataset.label}: ${fmt(c.raw,1)}`}}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{beginAtZero:true,grid:{color:GRID},border:{display:false},ticks:{font:{size:9}}}}}
     });
 
     let verdict="";
